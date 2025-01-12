@@ -1,3 +1,6 @@
+USE WebshopDB;
+GO
+
 IF OBJECT_ID('OrderLines', 'U') IS NOT NULL DROP TABLE OrderLines;
 IF OBJECT_ID('Orders', 'U') IS NOT NULL DROP TABLE Orders;
 IF OBJECT_ID('Cart', 'U') IS NOT NULL DROP TABLE Cart;
@@ -7,7 +10,7 @@ GO
 CREATE TABLE Products (
     Id INT PRIMARY KEY IDENTITY(1,1),
     Name NVARCHAR(100) NOT NULL,
-    Description NVARCHAR(1000) NULL,
+    Description NVARCHAR(800) NULL,
     ImageUrl NVARCHAR(MAX) NULL,
     Category NVARCHAR(50) NOT NULL,
     Price DECIMAL(10, 2) NOT NULL,
@@ -42,6 +45,7 @@ CREATE TABLE OrderLines (
 INSERT INTO Products (Name, Description, ImageUrl, Category, Price, Discount)
 VALUES
 ('Laptop', 'A powerful laptop computer', 'https://example.com/laptop.jpg', 'Electronics', 15000.00, 10),
+('Better Laptop', 'A more powerful laptop computer', 'https://example.com/better_laptop.jpg', 'Electronics', 15000.00, 10),
 ('T-shirt', 'A soft T-shirt', 'https://example.com/tshirt.jpg', 'Clothing', 200.00, 5),
 ('Headphones', 'Noise-cancelling headphones', 'https://example.com/headphones.jpg', 'Electronics', 1200.00, 15),
 ('Book', 'An interesting novel', 'https://example.com/book.jpg', 'Books', 150.00, 0);

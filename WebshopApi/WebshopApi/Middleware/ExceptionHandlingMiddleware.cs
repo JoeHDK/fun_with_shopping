@@ -25,7 +25,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
 
         var errorResponse = new
         {
-            StatusCode = context.Response.StatusCode,
+            context.Response.StatusCode,
             Message = "An error occurred while processing your request. Please try again later."
         };
 
