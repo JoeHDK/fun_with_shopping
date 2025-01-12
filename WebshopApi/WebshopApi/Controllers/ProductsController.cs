@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebshopApi.Mappers;
 using WebshopApi.Models;
 using WebshopApi.Services;
 
@@ -11,7 +12,9 @@ public class ProductsController(IProductService productService) : ControllerBase
     [HttpGet]
     public IActionResult GetProducts()
     {
-        return Ok(productService.GetAllProducts());
+        var products = productService.GetAllProducts();
+        var productDtos = ProductMapper.ToDtoList(products);
+        return Ok(productDtos);
     }
 
     [HttpGet("{id:int}")]
@@ -22,7 +25,8 @@ public class ProductsController(IProductService productService) : ControllerBase
         {
             return NotFound();
         }
-        return Ok(product);
+        var productDto = ProductMapper.ToDto(product);
+        return Ok(productDto);
     }
     
     [HttpGet("search")]

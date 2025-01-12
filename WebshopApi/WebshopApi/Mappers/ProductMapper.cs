@@ -5,7 +5,7 @@ namespace WebshopApi.Mappers;
 
 public static class ProductMapper
 {
-    private static ProductDto ToDto(Product product)
+    public static ProductDto ToDto(Product product)
     {
         return new ProductDto
         {
