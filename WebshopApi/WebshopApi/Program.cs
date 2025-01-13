@@ -26,6 +26,17 @@ builder.Services.AddScoped<IOrderLineRepository, OrderLineRepository>();
 builder.Services.AddDbContext<WebshopDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Replace with your React app URL
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.TagActionsBy(api => [api.GroupName]);
@@ -40,6 +51,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseCors("AllowReactApp");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

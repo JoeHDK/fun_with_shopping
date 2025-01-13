@@ -12,7 +12,8 @@ public static class ProductMapper
             Id = product.Id,
             Name = product.Name,
             Category = product.Category,
-            Price = product.Price
+            Price = product.Price,
+            Description = product.Description,
         };
     }
 

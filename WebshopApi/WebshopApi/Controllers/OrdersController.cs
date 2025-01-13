@@ -6,6 +6,7 @@ namespace WebshopApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[ApiExplorerSettings(GroupName = "Orders")]
 public class OrdersController(IOrderService orderService) : ControllerBase
 {
     // Get details of a specific order

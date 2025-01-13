@@ -1,25 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import Cookies from 'js-cookie';
+import api from './services/Api';
+import ProductList from "./components/ProductList";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    useEffect(() => {
+        const existingSessionId = Cookies.get('sessionId');
+        if (!existingSessionId) {
+            api.get('/session/init-session')
+                .then((response) => {
+                    console.log('Session initialized:', response.data.sessionId);
+                    Cookies.set('sessionId', response.data.sessionId, { expires: 0.0104 });
+                })
+                .catch((error) => {
+                    console.error('Error initializing session:', error);
+                });
+        } else {
+            console.log('Existing session ID:', existingSessionId);
+        }
+
+    }, []);
+
+    return (
+        <div className="App">
+            <header>
+                <h1>Welcome to the Webshop</h1>
+            </header>
+            <main>
+                <ProductList />
+            </main>
+        </div>
+    );
 }
 
 export default App;

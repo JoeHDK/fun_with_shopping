@@ -8,6 +8,7 @@ namespace WebshopApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[ApiExplorerSettings(GroupName = "OrderLine")]
 public class OrderLineController(IOrderLineService orderLineService) : ControllerBase
 {
     // Get all order lines for a specific order
