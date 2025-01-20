@@ -1,4 +1,6 @@
 ﻿import './css/CartPopup.css';
+import CartService from "../services/CartService";
+import Cookies from "js-cookie";
 
 function CartPopup({ cartItems, onClose }) {
     if (!cartItems?.items || cartItems.items.length === 0) {
@@ -12,6 +14,26 @@ function CartPopup({ cartItems, onClose }) {
             </div>
         );
     }
+
+    const createOrder = () => {
+        const sessionId = Cookies.get('sessionId');
+        if (!sessionId) {
+            console.error('Session ID not found in cookies.');
+            alert('Session ID is missing. Please reload the page.');
+            return;
+        }
+
+        // Call the backend API to create the order
+        CartService.createOrder(sessionId)
+            .then(() => {
+                alert('Order created successfully!');
+                onClose(); // Close the cart popup
+            })
+            .catch((error) => {
+                console.error('Error creating order:', error);
+                alert('Failed to create order. Please try again.');
+            });
+    };
 
     return (
         <div className="popup-overlay" onClick={onClose}>
@@ -37,8 +59,11 @@ function CartPopup({ cartItems, onClose }) {
                     ))}
                     </tbody>
                 </table>
-                <p><strong>Total: {cartItems.total} DKK</strong></p>
+                <h3>Total: {cartItems.total} DKK</h3>
                 <button className="close-button" onClick={onClose}>Close</button>
+                <button className="create-order-button" onClick={createOrder}>
+                    Place Order
+                </button>
             </div>
         </div>
     );

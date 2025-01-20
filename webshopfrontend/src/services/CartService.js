@@ -10,6 +10,9 @@ const CartService = {
     addToCart: (cartItem) => {
         return api.post('/cart', cartItem); // Add to cart
     },
-};
+    createOrder(sessionId) {
+        return api.post(`/Orders/${sessionId}`);
+    },
 
+};
 export default CartService;

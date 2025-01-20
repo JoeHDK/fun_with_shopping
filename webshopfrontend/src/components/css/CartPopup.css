@@ -67,3 +67,17 @@
 .close-button:hover {
     background: #c0392b;
 }
+
+.create-order-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.create-order-button:hover {
+    background-color: #0056b3;
+}
