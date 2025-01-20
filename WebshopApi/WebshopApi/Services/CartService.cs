@@ -21,36 +21,36 @@ public class CartService(ICartRepository cartRepository, IProductRepository prod
         {
             throw new ArgumentException("Invalid product ID.");
         }
-        Console.WriteLine($"AddToCart called with ProductId={productId}, Quantity={quantity}, SessionId={sessionId}");
+        //Console.WriteLine($"AddToCart called with ProductId={productId}, Quantity={quantity}, SessionId={sessionId}");
 
         try
         {
             // Check if the product exists
-            Console.WriteLine($"Checking if product with ID {productId} exists...");
+            //Console.WriteLine($"Checking if product with ID {productId} exists...");
             if (productRepository.GetById(productId) == null)
             {
-                Console.WriteLine($"Product with ID {productId} does not exist.");
+                //Console.WriteLine($"Product with ID {productId} does not exist.");
                 throw new ArgumentException("Invalid product ID.");
             }
 
-            Console.WriteLine($"Product with ID {productId} exists.");
+            //Console.WriteLine($"Product with ID {productId} exists.");
 
             // Check if the item is already in the cart
-            Console.WriteLine($"Checking if cart item exists for ProductId={productId} and SessionId={sessionId}...");
+            //Console.WriteLine($"Checking if cart item exists for ProductId={productId} and SessionId={sessionId}...");
             var existingCartItem = cartRepository.GetAllBySessionId(sessionId)
                 .FirstOrDefault(c => c.ProductId == productId);
 
             if (existingCartItem != null)
             {
-                Console.WriteLine($"Cart item found for ProductId={productId}. Updating quantity...");
+                //Console.WriteLine($"Cart item found for ProductId={productId}. Updating quantity...");
                 // Update the quantity
                 existingCartItem.Quantity += quantity;
                 cartRepository.Update(existingCartItem);
-                Console.WriteLine($"Updated quantity to {existingCartItem.Quantity} for ProductId={productId}.");
+                //Console.WriteLine($"Updated quantity to {existingCartItem.Quantity} for ProductId={productId}.");
             }
             else
             {
-                Console.WriteLine($"No existing cart item found for ProductId={productId}. Adding new item...");
+                //Console.WriteLine($"No existing cart item found for ProductId={productId}. Adding new item...");
                 // Add a new cart item
                 var newCartItem = new Cart
                 {

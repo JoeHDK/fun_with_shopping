@@ -32,8 +32,8 @@ public class CartController(ICartService cartService) : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching cart for sessionId {sessionId}: {ex.Message}");
-            Console.WriteLine(ex.StackTrace);
+            //Console.WriteLine($"Error fetching cart for sessionId {sessionId}: {ex.Message}");
+            //Console.WriteLine(ex.StackTrace);
             return StatusCode(500, new { Message = "An error occurred while processing your request. Please try again later." });
         }
     }
@@ -54,7 +54,7 @@ public class CartController(ICartService cartService) : ControllerBase
 
         try
         {
-            Console.WriteLine($"Adding productId {cartItem.ProductId} to cart for sessionId {cartItem.SessionId} with quantity {cartItem.Quantity}");
+            //Console.WriteLine($"Adding productId {cartItem.ProductId} to cart for sessionId {cartItem.SessionId} with quantity {cartItem.Quantity}");
 
             // Call the service to handle the cart addition
             cartService.AddToCart(cartItem.ProductId, cartItem.Quantity, cartItem.SessionId);
