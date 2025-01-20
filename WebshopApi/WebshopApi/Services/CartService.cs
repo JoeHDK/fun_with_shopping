@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using WebshopApi.Models;
+﻿using WebshopApi.Models;
 using WebshopApi.Repositories;
 
 namespace WebshopApi.Services;
@@ -78,25 +77,21 @@ public void AddToCart(int productId, int quantity, string sessionId)
     public decimal GetCartTotal(string sessionId)
     {
         var cartItems = cartRepository.GetAllBySessionId(sessionId);
-        
-        decimal total = 0;
-        
-        // Calculating potential discount
-        foreach (var item in cartItems)
+        var total = cartItems.Sum(item =>
         {
-            var itemPrice = item.Product.Price * item.Quantity;
-            if (item.Quantity >= 5)
-            {
-                itemPrice *= (1 - item.Product.Discount / 100);
-            }
+            var basePrice = item.Product.Price * item.Quantity;
+            return item.Quantity >= 5
+                ? basePrice * (1 - item.Product.Discount / 100)
+                : basePrice;
+        });
 
-            total += itemPrice;
-        }
-
+        // Apply global discount if total exceeds 5000 DKK
         if (total > 5000)
         {
             total *= 0.95m;
         }
+
         return total;
     }
+
 }

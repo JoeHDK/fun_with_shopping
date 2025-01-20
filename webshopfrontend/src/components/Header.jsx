@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import './Header.css'; // For styling
+import CartPopup from "./CartPopup";
 
 function Header({ onSort, sortOrder }) {
     return (
@@ -19,5 +20,3 @@ function Header({ onSort, sortOrder }) {
         </header>
     );
 }
-
-export default Header;

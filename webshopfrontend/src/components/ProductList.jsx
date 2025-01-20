@@ -1,171 +1,117 @@
 ﻿import React, { useEffect, useState } from 'react';
-import api from '../services/Api';
-import './css/ProductList.css';
+import CartService from '../services/CartService'; // Consistent service usage
 import Cookies from 'js-cookie';
+import CartPopup from './CartPopup'; // Popup component for cart details
+import './css/ProductList.css';
 
 function ProductList() {
     const [products, setProducts] = useState([]);
-    const [selectedProduct, setSelectedProduct] = useState(null); // Track selected product
-    const [sortOption, setSortOption] = useState('price-asc'); // Default sort option
-    const [cartMessage, setCartMessage] = useState(''); // Feedback message for cart actions
-    const [loading, setLoading] = useState(true); // Loading state for products
-    const [error, setError] = useState(null); // Error state for fetching products
-    
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [cartVisible, setCartVisible] = useState(false);
+    const [cartItems, setCartItems] = useState([]);
+    const [cartMessage, setCartMessage] = useState('');
+    const [sortOption, setSortOption] = useState('price-asc');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Fetch products
     useEffect(() => {
-        console.log('Fetching products...');
-        api.get('/products')
+        CartService.getProducts()
             .then((response) => {
-                console.log('Products fetched successfully:', response.data);
                 setProducts(response.data);
             })
             .catch((error) => {
                 console.error('Error fetching products:', error);
-                setError('Failed to load products. Please try again later.');
+                setError('Failed to load products.');
             })
-            .finally(() => {
-                setLoading(false);
-            });
+            .finally(() => setLoading(false));
     }, []);
 
+    // Open Cart Popup
+    const openCart = () => {
+        const sessionId = Cookies.get('sessionId');
+        if (!sessionId) {
+            console.error('Session ID not found in cookies.');
+            setError('Session ID is missing. Please reload the page.');
+            return;
+        }
 
-    const openPopup = (product) => {
-        setSelectedProduct(product);
+        CartService.getCart(sessionId)
+            .then((response) => {
+                setCartItems(response.data); // Assuming response.data is an array
+                setCartVisible(true);
+            })
+            .catch((error) => {
+                console.error('Error fetching cart:', error.response?.data || error.message);
+                setError('Failed to load cart items.');
+            });
     };
 
-    const closePopup = () => {
-        setSelectedProduct(null);
+    // Close Cart Popup
+    const closeCart = () => setCartVisible(false);
+
+    // Add Product to Cart
+    const addToCart = (productId) => {
+        const sessionId = Cookies.get('sessionId');
+        if (!sessionId) {
+            console.error('Session ID not found.');
+            setCartMessage('Failed to add item to cart.');
+            return;
+        }
+
+        const cartItem = { productId, quantity: 1, sessionId };
+        CartService.addToCart(cartItem)
+            .then(() => {
+                setCartMessage('Item added to cart!');
+                setTimeout(() => setCartMessage(''), 3000);
+            })
+            .catch((error) => {
+                console.error('Error adding to cart:', error);
+                setCartMessage('Failed to add item to cart.');
+            });
     };
 
+    // Sort Products
     const handleSortChange = (event) => {
         const option = event.target.value;
         setSortOption(option);
 
-        let sortedProducts = [...products];
-        switch (option) {
-            case 'price-asc':
-                sortedProducts.sort((a, b) => a.price - b.price);
-                break;
-            case 'price-desc':
-                sortedProducts.sort((a, b) => b.price - a.price);
-                break;
-            case 'alpha-asc':
-                sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
-                break;
-            default:
-                break;
-        }
+        const sortedProducts = [...products];
+        if (option === 'price-asc') sortedProducts.sort((a, b) => a.price - b.price);
+        if (option === 'price-desc') sortedProducts.sort((a, b) => b.price - a.price);
+
         setProducts(sortedProducts);
     };
 
-    const addToCart = (productId) => {
-        // Retrieve the session ID from the cookie
-        const sessionId = Cookies.get('sessionId');
 
-        if (!sessionId) {
-            console.error('Session ID is missing. Ensure session initialization is working correctly.');
-            setCartMessage('Failed to add item to cart. No session ID found.');
-            return;
-        }
-
-        const cartItem = {
-            productId, // Matches backend property name
-            quantity: 1, // Default quantity
-            sessionId, // Use session ID from the cookie
-        };
-
-        console.log('Cart item being sent:', cartItem);
-
-        api.post('/cart', cartItem)
-            .then(() => {
-                setCartMessage('Item added to cart!');
-                setTimeout(() => setCartMessage(''), 3000); // Clear message after 3 seconds
-            })
-            .catch((error) => {
-                console.error('Error adding to cart:', error.response?.data || error.message);
-                setCartMessage('Failed to add item to cart.');
-                setTimeout(() => setCartMessage(''), 3000); // Clear message after 3 seconds
-            });
-    };
-
+    // Handle Loading and Errors
     if (loading) return <div>Loading products...</div>;
     if (error) return <div className="error-message">{error}</div>;
 
+    // Render Component
     return (
         <div>
-            {/* Header Bar */}
             <header className="header">
                 <h1>Webshop</h1>
                 <div className="header-actions">
-                    {/* Sort Dropdown */}
-                    <select
-                        value={sortOption}
-                        onChange={handleSortChange}
-                        className="sort-dropdown"
-                    >
+                    <select value={sortOption} onChange={handleSortChange}>
                         <option value="price-asc">Price (Ascending)</option>
                         <option value="price-desc">Price (Descending)</option>
-                        <option value="alpha-asc">Alphabetical (A-Z)</option>
                     </select>
-
-                    {/* Cart Button Placeholder */}
-                    <button className="cart-button">🛒 View Cart</button>
+                    <button onClick={openCart}>🛒 View Cart</button>
                 </div>
             </header>
-
-            {/* Feedback Message */}
-            {cartMessage && <div className="cart-message">{cartMessage}</div>}
-
-            {/* Product Grid */}
-            <h2>Available Products</h2>
+            {cartMessage && <div>{cartMessage}</div>}
             <div className="product-grid">
                 {products.map((product) => (
-                    <div
-                        key={product.id}
-                        className="product-card"
-                        onClick={() => openPopup(product)}
-                    >
+                    <div key={product.id} className="product-card">
                         <h2>{product.name}</h2>
-                        <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            className="product-image"
-                        />
-                        <p>
-                            <strong>Price:</strong> {product.price} DKK
-                        </p>
+                        <p>{product.price} DKK</p>
+                        <button onClick={() => addToCart(product.id)}>Add to Cart</button>
                     </div>
                 ))}
             </div>
-
-            {/* Popup */}
-            {selectedProduct && (
-                <div className="popup-overlay" onClick={closePopup}>
-                    <div
-                        className="popup-content"
-                        onClick={(e) => e.stopPropagation()} // Prevent closing on content click
-                    >
-                        <img
-                            src={selectedProduct.imageUrl}
-                            alt={selectedProduct.name}
-                            className="popup-image"
-                        />
-                        <h2>{selectedProduct.name}</h2>
-                        <p>{selectedProduct.description}</p>
-                        <p>
-                            <strong>Price:</strong> {selectedProduct.price} DKK
-                        </p>
-                        <button
-                            className="buy-button"
-                            onClick={() => addToCart(selectedProduct.id)}
-                        >
-                            Buy
-                        </button>
-                        <button className="close-button" onClick={closePopup}>
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
+            {cartVisible && <CartPopup cartItems={cartItems} onClose={closeCart}/>}
         </div>
     );
 }

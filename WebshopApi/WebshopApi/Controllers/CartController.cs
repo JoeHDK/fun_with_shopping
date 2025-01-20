@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebshopApi.DTOs;
 using WebshopApi.Mappers;
-using WebshopApi.Models;
 using WebshopApi.Services;
 
 namespace WebshopApi.Controllers;
@@ -15,9 +14,28 @@ public class CartController(ICartService cartService) : ControllerBase
     [HttpGet("{sessionId}")]
     public IActionResult GetCart(string sessionId)
     {
-        var cartItems = cartService.GetCartItems(sessionId);
-        var cartDtos = CartMapper.ToDtoList(cartItems);
-        return Ok(cartDtos);
+        try
+        {
+            var cartItems = cartService.GetCartItems(sessionId);
+            if (!cartItems.Any())
+            {
+                return Ok(new List<CartDto>()); // Return empty list if no items
+            }
+            
+            var cartDtos = CartMapper.ToDtoList(cartItems);
+            var total = cartService.GetCartTotal(sessionId);
+            return Ok(new
+            {
+                Items = cartDtos,
+                Total = total
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching cart for sessionId {sessionId}: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+            return StatusCode(500, new { Message = "An error occurred while processing your request. Please try again later." });
+        }
     }
 
     // Add an item to the cart

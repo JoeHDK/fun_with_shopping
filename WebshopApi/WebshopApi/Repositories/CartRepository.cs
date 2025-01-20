@@ -1,4 +1,5 @@
-﻿using WebshopApi.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using WebshopApi.Data;
 using WebshopApi.Models;
 
 namespace WebshopApi.Repositories;
@@ -6,7 +7,7 @@ namespace WebshopApi.Repositories;
 public class CartRepository(WebshopDbContext context) : ICartRepository
 {
     public IEnumerable<Cart> GetAllBySessionId(string sessionId) =>
-        context.Cart.Where(c => c.SessionId == sessionId).ToList();
+        context.Cart.Include(c => c.Product).Where(c => c.SessionId == sessionId).ToList();
 
     public Cart? GetById(int id) => context.Cart.Find(id);
 
