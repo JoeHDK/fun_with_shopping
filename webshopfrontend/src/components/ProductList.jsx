@@ -1,14 +1,14 @@
 ﻿import React, { useEffect, useState } from 'react';
-import CartService from '../services/CartService'; // Consistent service usage
 import Cookies from 'js-cookie';
-import CartPopup from './CartPopup'; // Popup component for cart details
+import CartPopup from './CartPopup';
+import Header from './Header';
 import './css/ProductList.css';
+import ICartService from "../services/Interfaces/ICartService";
 
 function ProductList() {
     const [products, setProducts] = useState([]);
-    const [selectedProduct, setSelectedProduct] = useState(null);
     const [cartVisible, setCartVisible] = useState(false);
-    const [cartItems, setCartItems] = useState([]);
+    const [cartItems, setCartItems] = useState({ items: [], total: 0 });
     const [cartMessage, setCartMessage] = useState('');
     const [sortOption, setSortOption] = useState('price-asc');
     const [loading, setLoading] = useState(true);
@@ -16,9 +16,9 @@ function ProductList() {
 
     // Fetch products
     useEffect(() => {
-        CartService.getProducts()
-            .then((response) => {
-                setProducts(response.data);
+        ICartService.getProducts()
+            .then((products) => {
+                setProducts(products);
             })
             .catch((error) => {
                 console.error('Error fetching products:', error);
@@ -26,7 +26,7 @@ function ProductList() {
             })
             .finally(() => setLoading(false));
     }, []);
-
+    
     // Open Cart Popup
     const openCart = () => {
         const sessionId = Cookies.get('sessionId');
@@ -36,21 +36,32 @@ function ProductList() {
             return;
         }
 
-        CartService.getCart(sessionId)
+        ICartService.getCart(sessionId)
             .then((response) => {
-                setCartItems(response.data); // Assuming response.data is an array
-                setCartVisible(true);
+                console.log('Cart API response:', response); // Log the full response
+
+                // Ensure the response structure matches the state shape
+                const cartData = response || { items: [], total: 0 };
+
+                setCartItems(cartData); // Update the state correctly
+                console.log('Updated Cart Items:', cartData);
+
+                setCartVisible(true); // Open the cart popup
             })
             .catch((error) => {
                 console.error('Error fetching cart:', error.response?.data || error.message);
                 setError('Failed to load cart items.');
             });
+
     };
+
+
 
     // Close Cart Popup
     const closeCart = () => setCartVisible(false);
 
     // Add Product to Cart
+// Add Product to Cart
     const addToCart = (productId) => {
         const sessionId = Cookies.get('sessionId');
         if (!sessionId) {
@@ -60,29 +71,55 @@ function ProductList() {
         }
 
         const cartItem = { productId, quantity: 1, sessionId };
-        CartService.addToCart(cartItem)
+
+        // Log the product being added
+        console.log('Adding product to cart:', cartItem);
+
+        ICartService.addToCart(cartItem)
             .then(() => {
                 setCartMessage('Item added to cart!');
+
+                // Fetch the updated cart to sync state
+                ICartService.getCart(sessionId)
+                    .then((response) => {
+                        const updatedCart = response.items || [];
+                        setCartItems({
+                            items: updatedCart,
+                            total: calculateCartTotal(updatedCart),
+                        });
+
+                        // Log the updated cart
+                        console.log('Updated cart:', updatedCart);
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching updated cart:', error);
+                    });
+
                 setTimeout(() => setCartMessage(''), 3000);
             })
             .catch((error) => {
-                console.error('Error adding to cart:', error);
+                console.error('Error adding to cart:', error.response?.data || error.message);
                 setCartMessage('Failed to add item to cart.');
             });
     };
 
-    // Sort Products
-    const handleSortChange = (event) => {
-        const option = event.target.value;
+
+
+    const calculateCartTotal = (cartItems) => {
+        return cartItems.reduce((total, item) => total + (item.totalPrice || 0), 0);
+    };
+    
+    // Handle sorting
+    const handleSortChange = (option) => {
         setSortOption(option);
 
         const sortedProducts = [...products];
         if (option === 'price-asc') sortedProducts.sort((a, b) => a.price - b.price);
         if (option === 'price-desc') sortedProducts.sort((a, b) => b.price - a.price);
+        if (option === 'Alphabetical') sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
 
         setProducts(sortedProducts);
     };
-
 
     // Handle Loading and Errors
     if (loading) return <div>Loading products...</div>;
@@ -91,16 +128,12 @@ function ProductList() {
     // Render Component
     return (
         <div>
-            <header className="header">
-                <h1>Webshop</h1>
-                <div className="header-actions">
-                    <select value={sortOption} onChange={handleSortChange}>
-                        <option value="price-asc">Price (Ascending)</option>
-                        <option value="price-desc">Price (Descending)</option>
-                    </select>
-                    <button onClick={openCart}>🛒 View Cart</button>
-                </div>
-            </header>
+            <Header
+                onSortChange={handleSortChange}
+                onCartClick={openCart}
+                sortOption={sortOption}
+                cartItemCount={cartItems.items?.length || 0}
+            />
             {cartMessage && <div>{cartMessage}</div>}
             <div className="product-grid">
                 {products.map((product) => (
@@ -111,9 +144,8 @@ function ProductList() {
                     </div>
                 ))}
             </div>
-            {cartVisible && <CartPopup cartItems={cartItems} onClose={closeCart}/>}
+            {cartVisible && <CartPopup cartItems={cartItems} onClose={closeCart} />}
         </div>
     );
 }
-
 export default ProductList;

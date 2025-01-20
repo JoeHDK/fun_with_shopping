@@ -1,22 +1,29 @@
 ﻿import React from 'react';
-import './Header.css'; // For styling
-import CartPopup from "./CartPopup";
+import './css/Header.css';
 
-function Header({ onSort, sortOrder }) {
+function Header({ onSortChange, onCartClick, sortOption, cartItemCount }) {
+    const cartItems = cartItemCount ? cartItemCount : [];
     return (
         <header className="header">
             <h1>Webshop</h1>
             <div className="header-actions">
-                {/* Sort Button */}
-                <button onClick={onSort} className="sort-button">
-                    Sort by Price ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
-                </button>
+                {/* Sort Dropdown */}
+                <select value={sortOption} onChange={(e) => onSortChange(e.target.value)}>
+                    <option value="price-asc">Price (Ascending)</option>
+                    <option value="price-desc">Price (Descending)</option>
+                    <option value="Alphabetical">Alphabetical</option>
+                </select>
 
                 {/* Cart Button */}
-                <button className="cart-button">
-                    🛒 View Cart
+                <button
+                    className={`cart-button`}
+                    onClick={onCartClick}
+                >
+                    🛒 
                 </button>
             </div>
         </header>
     );
 }
+
+export default Header;

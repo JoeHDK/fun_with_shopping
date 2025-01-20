@@ -1,8 +1,17 @@
-﻿import './css/CartPopup.css';
-import CartService from "../services/CartService";
+﻿import React, { useEffect } from 'react';
+import './css/CartPopup.css';
 import Cookies from "js-cookie";
+import IOrderService from "../services/Interfaces/IOrderService";
 
 function CartPopup({ cartItems, onClose }) {
+    useEffect(() => {
+        console.log('CartPopup received cartItems:', cartItems); // Log cartItems to debug
+    }, [cartItems]);
+
+    if (!cartItems || !cartItems.items) {
+        return <div>No items in cart.</div>;
+    }
+    
     if (!cartItems?.items || cartItems.items.length === 0) {
         return (
             <div className="popup-overlay" onClick={onClose}>
@@ -18,22 +27,29 @@ function CartPopup({ cartItems, onClose }) {
     const createOrder = () => {
         const sessionId = Cookies.get('sessionId');
         if (!sessionId) {
-            console.error('Session ID not found in cookies.');
             alert('Session ID is missing. Please reload the page.');
             return;
         }
 
-        // Call the backend API to create the order
-        CartService.createOrder(sessionId)
+        const orderData = {
+            sessionId,
+            items: cartItems.items,
+            total: cartItems.total,
+        };
+
+        console.log("Order Data:", orderData);
+
+        IOrderService.createOrder(orderData)
             .then(() => {
                 alert('Order created successfully!');
-                onClose(); // Close the cart popup
+                onClose();
             })
             .catch((error) => {
                 console.error('Error creating order:', error);
                 alert('Failed to create order. Please try again.');
             });
     };
+
 
     return (
         <div className="popup-overlay" onClick={onClose}>
@@ -51,7 +67,7 @@ function CartPopup({ cartItems, onClose }) {
                     <tbody>
                     {cartItems.items.map((item) => (
                         <tr key={item.id}>
-                            <td>{item.productName || 'N/A'}</td>
+                            <td>{item.productName}</td>
                             <td>{item.quantity}</td>
                             <td>{item.price ? `${item.price} DKK` : 'N/A'}</td>
                             <td>{item.totalPrice ? `${item.totalPrice} DKK` : 'N/A'}</td>

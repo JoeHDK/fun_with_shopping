@@ -1,18 +1,20 @@
-﻿import api from './Api';
+﻿import ICartService from './Interfaces/ICartService';
+import api from "./Api";
 
 const CartService = {
-    getProducts: () => {
-        return api.get('/products'); // Fetch products
+    getProducts: async () => {
+        const response = await api.get('/products');
+        return response.data;
     },
-    getCart: (sessionId) => {
-        return api.get(`/cart/${sessionId}`); // Fetch cart
+    getCart: async (sessionId) => {
+        const response = await api.get(`/cart?sessionId=${sessionId}`);
+        return response.data;
     },
-    addToCart: (cartItem) => {
-        return api.post('/cart', cartItem); // Add to cart
+    addToCart: async (cartItem) => {
+        await api.post('/cart', cartItem);
     },
-    createOrder(sessionId) {
-        return api.post(`/Orders/${sessionId}`);
-    },
-
 };
+
+Object.assign(CartService, ICartService);
+
 export default CartService;
