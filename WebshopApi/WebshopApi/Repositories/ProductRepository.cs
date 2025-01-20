@@ -42,4 +42,9 @@ public class ProductRepository(WebshopDbContext context) : IProductRepository
     {
         context.SaveChanges();
     }
+
+    public bool ProductExists(int id)
+    {
+        return context.Products.Any(p => p.Id == id);
+    }
 }

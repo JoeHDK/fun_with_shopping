@@ -10,4 +10,5 @@ public interface IProductRepository
     void Update(Product product);
     void Delete(Product product);
     void SaveChanges();
+    bool ProductExists(int id);
 }

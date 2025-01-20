@@ -5,64 +5,75 @@ namespace WebshopApi.Services;
 
 public class CartService(ICartRepository cartRepository, IProductRepository productRepository) : ICartService
 {
-    public IEnumerable<Cart> GetCartItems(string sessionId) =>
-        cartRepository.GetAllBySessionId(sessionId);
-
-    public Cart? GetCartItem(int id) => cartRepository.GetById(id);
-public void AddToCart(int productId, int quantity, string sessionId)
-{
-    Console.WriteLine($"AddToCart called with ProductId={productId}, Quantity={quantity}, SessionId={sessionId}");
-
-    try
+    public IEnumerable<Cart> GetCartItems(string sessionId)
     {
-        // Check if the product exists
-        Console.WriteLine($"Checking if product with ID {productId} exists...");
-        if (productRepository.GetById(productId) == null)
+        return cartRepository.GetAllBySessionId(sessionId);
+    }
+
+    public Cart? GetCartItem(int id)
+    {
+        return cartRepository.GetById(id);
+    }
+
+    public void AddToCart(int productId, int quantity, string sessionId)
+    {
+        if (!productRepository.ProductExists(productId))
         {
-            Console.WriteLine($"Product with ID {productId} does not exist.");
             throw new ArgumentException("Invalid product ID.");
         }
-        Console.WriteLine($"Product with ID {productId} exists.");
+        Console.WriteLine($"AddToCart called with ProductId={productId}, Quantity={quantity}, SessionId={sessionId}");
 
-        // Check if the item is already in the cart
-        Console.WriteLine($"Checking if cart item exists for ProductId={productId} and SessionId={sessionId}...");
-        var existingCartItem = cartRepository.GetAllBySessionId(sessionId)
-            .FirstOrDefault(c => c.ProductId == productId);
-
-        if (existingCartItem != null)
+        try
         {
-            Console.WriteLine($"Cart item found for ProductId={productId}. Updating quantity...");
-            // Update the quantity
-            existingCartItem.Quantity += quantity;
-            cartRepository.Update(existingCartItem);
-            Console.WriteLine($"Updated quantity to {existingCartItem.Quantity} for ProductId={productId}.");
-        }
-        else
-        {
-            Console.WriteLine($"No existing cart item found for ProductId={productId}. Adding new item...");
-            // Add a new cart item
-            var newCartItem = new Cart
+            // Check if the product exists
+            Console.WriteLine($"Checking if product with ID {productId} exists...");
+            if (productRepository.GetById(productId) == null)
             {
-                ProductId = productId,
-                Quantity = quantity,
-                SessionId = sessionId
-            };
+                Console.WriteLine($"Product with ID {productId} does not exist.");
+                throw new ArgumentException("Invalid product ID.");
+            }
 
-            cartRepository.Add(newCartItem);
-            Console.WriteLine($"Added new cart item for ProductId={productId} with Quantity={quantity}.");
+            Console.WriteLine($"Product with ID {productId} exists.");
+
+            // Check if the item is already in the cart
+            Console.WriteLine($"Checking if cart item exists for ProductId={productId} and SessionId={sessionId}...");
+            var existingCartItem = cartRepository.GetAllBySessionId(sessionId)
+                .FirstOrDefault(c => c.ProductId == productId);
+
+            if (existingCartItem != null)
+            {
+                Console.WriteLine($"Cart item found for ProductId={productId}. Updating quantity...");
+                // Update the quantity
+                existingCartItem.Quantity += quantity;
+                cartRepository.Update(existingCartItem);
+                Console.WriteLine($"Updated quantity to {existingCartItem.Quantity} for ProductId={productId}.");
+            }
+            else
+            {
+                Console.WriteLine($"No existing cart item found for ProductId={productId}. Adding new item...");
+                // Add a new cart item
+                var newCartItem = new Cart
+                {
+                    ProductId = productId,
+                    Quantity = quantity,
+                    SessionId = sessionId
+                };
+
+                cartRepository.Add(newCartItem);
+                Console.WriteLine($"Added new cart item for ProductId={productId} with Quantity={quantity}.");
+            }
+
+            // Save changes
+            Console.WriteLine("Saving changes to the cart...");
+            cartRepository.SaveChanges();
+            Console.WriteLine("Changes saved successfully.");
         }
-
-        // Save changes
-        Console.WriteLine("Saving changes to the cart...");
-        cartRepository.SaveChanges();
-        Console.WriteLine("Changes saved successfully.");
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in AddToCart: {ex.Message}");
+            throw;
+        }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error in AddToCart: {ex.Message}");
-        throw;
-    }
-}
 
 
     public void RemoveFromCart(int id)
@@ -86,12 +97,13 @@ public void AddToCart(int productId, int quantity, string sessionId)
         });
 
         // Apply global discount if total exceeds 5000 DKK
-        if (total > 5000)
-        {
-            total *= 0.95m;
-        }
+        if (total > 5000) total *= 0.95m;
 
         return total;
     }
 
+    public IEnumerable<Cart> GetCartBySessionId(string sessionId)
+    {
+        return cartRepository.GetAllBySessionId(sessionId);
+    }
 }

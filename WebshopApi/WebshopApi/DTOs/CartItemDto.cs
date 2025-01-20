@@ -11,5 +11,5 @@ public class CartItemDto
     public int Quantity { get; set; }
 
     [Required]
-    public string SessionId { get; set; }
+    public required string SessionId { get; set; }
 }

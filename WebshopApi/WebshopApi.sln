@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebshopApi", "WebshopApi\WebshopApi.csproj", "{0234F014-C4D2-4B4D-9068-A34750DA7C0E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebshopApi.Tests", "WebshopApi.Tests\WebshopApi.Tests.csproj", "{8624FBE1-1832-4429-94C8-C680030B18EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{0234F014-C4D2-4B4D-9068-A34750DA7C0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0234F014-C4D2-4B4D-9068-A34750DA7C0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0234F014-C4D2-4B4D-9068-A34750DA7C0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8624FBE1-1832-4429-94C8-C680030B18EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8624FBE1-1832-4429-94C8-C680030B18EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8624FBE1-1832-4429-94C8-C680030B18EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8624FBE1-1832-4429-94C8-C680030B18EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
